@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TFQA – Mega‑Quiz de Repaso (Parcial 1)</title>
+<style>
+  :root{--bg:#0b0e14;--card:#151a24;--ink:#e9eef5;--mut:#9aa4b2;--ok:#1fbe74;--bad:#ff4d4f;--bd:#2a3246;--accent:#6ea8fe}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,Segoe UI,Roboto,Arial}
+  header{position:sticky;top:0;z-index:9;background:#0b0e14cc;border-bottom:1px solid var(--bd);backdrop-filter:blur(6px)}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  h1{margin:0 0 6px;font-size:1.15rem}
+  .mut{color:var(--mut)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .pill{border:1px solid var(--bd);border-radius:999px;padding:6px 10px;color:var(--mut)}
+  button,select,input{border:1px solid var(--bd);border-radius:10px;background:#0f1524;color:var(--ink);padding:8px 12px;font-weight:600;cursor:pointer}
+  button:hover,select:hover{border-color:var(--accent)}
+  .tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab{border:1px solid var(--bd);background:#121a2f;color:var(--ink);padding:8px 12px;border-radius:999px;cursor:pointer}
+  .tab.active{background:#1b2441;border-color:#3f5aa5}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin:16px auto}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+  .qhead{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
+  .qno{font-variant-numeric:tabular-nums;background:#0f1524;border:1px solid var(--bd);color:#9cc0ff;padding:2px 8px;border-radius:8px}
+  .tag{margin-left:auto;color:#aeb7ff;font-size:.75rem;border:1px solid var(--bd);border-radius:8px;padding:2px 8px}
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt{border:1px solid var(--bd);background:#0f1524;border-radius:10px;padding:9px 10px;display:flex;gap:10px;align-items:center;cursor:pointer}
+  .opt .letter{width:22px;height:22px;display:grid;place-items:center;border-radius:6px;border:1px solid var(--bd);background:#151a2c;color:#9aa4b2;font-weight:700}
+  .opt.right{border-color:var(--ok);background:rgba(31,190,116,.08)} .opt.right .letter{background:var(--ok);border-color:var(--ok);color:#00180c}
+  .opt.wrong{border-color:var(--bad);background:rgba(255,77,79,.08)} .opt.wrong .letter{background:var(--bad);border-color:var(--bad);color:#1d0000}
+  .explain{margin-top:8px;color:var(--mut);font-size:.9rem}
+  .footer{display:flex;justify-content:space-between;align-items:center;color:var(--mut);margin:8px 0 18px}
+  .legend{display:flex;gap:10px;align-items:center}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .ok{background:var(--ok)} .bad{background:var(--bad)}
+  .fab{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:10}
+  .accent{background:#1b2441}
+  @media (max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>TFQA – Mega‑Quiz de Repaso (Parcial 1)</h1>
+    <div class="mut">Bloques: <b>TM&E</b> (transferencias y métodos), <b>LIP</b> (lípidos/fritura), <b>HUE</b>, <b>CAR</b>, <b>HC‑BPM</b>, <b>CEL‑LEG</b>, <b>LEC</b> (leche), <b>GLU</b> (gluten), <b>F&H</b> (frutas/hortalizas), <b>ALM</b> (almidón/APM), <b>BPM</b> (buenas prácticas), <b>NORM</b> (receta/ficha).</div>
+    <div class="row" style="margin-top:8px">
+      <span class="pill">Preguntas: <b id="count">0</b></span>
+      <span class="pill">Contestadas: <b id="answered">0</b></span>
+      <span class="pill">Correctas: <b id="right">0</b></span>
+      <button id="shuffle" class="accent">Barajar opciones</button>
+      <button id="reset">Reiniciar</button>
+      <span class="pill">Buscar: <input id="search" placeholder="ej. Maillard, clorofila, UHT, CRA"/></span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="ALL">Todas</button>
+      <button class="tab" data-tab="TM&E">TM&E</button>
+      <button class="tab" data-tab="LIP">LIP</button>
+      <button class="tab" data-tab="HUE">HUE</button>
+      <button class="tab" data-tab="CAR">CAR</button>
+      <button class="tab" data-tab="HC‑BPM">HC‑BPM</button>
+      <button class="tab" data-tab="CEL‑LEG">CEL‑LEG</button>
+      <button class="tab" data-tab="LEC">LEC</button>
+      <button class="tab" data-tab="GLU">GLU</button>
+      <button class="tab" data-tab="F&H">F&H</button>
+      <button class="tab" data-tab="ALM">ALM</button>
+      <button class="tab" data-tab="BPM">BPM</button>
+      <button class="tab" data-tab="NORM">NORM</button>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div id="grid" class="grid"></div>
+  <div class="footer">
+    <div class="legend"><span class="dot ok"></span> Correcta <span class="dot bad" style="margin-left:12px"></span> Incorrecta</div>
+    <div>Progreso: <b id="progress">0</b>%</div>
+  </div>
+</main>
+<div class="fab">
+  <button id="toTop">⬆️ Arriba</button>
+  <button id="toBot">⬇️ Abajo</button>
+</div>
+<script>
+// ===== Banco de preguntas =====
+// {tag:'', q:'', options:['','','',''], correct:idx, explain:''}
+const BANK = [
+  // TM&E – Transferencias y métodos (11)
+  {tag:'TM&E', q:'La cocción se define como…', options:[
+    'Operación térmica que modifica aspecto, textura, valor nutritivo y calidad microbiológica',
+    'Solo dorar la superficie del alimento',
+    'Únicamente un proceso físico sin cambios químicos',
+    'Proceso que no afecta a los sentidos'], correct:0, explain:'Definición integral: impacto físico, químico, sensorial y microbiológico.'},
+  {tag:'TM&E', q:'Conducción es dominante en…', options:['Plancha/metales; lenta en sólidos','Horno convección forzada','Microondas','Vapor'], correct:0, explain:'Transferencia molecula a molécula, eficiente en metales.'},
+  {tag:'TM&E', q:'Convección natural/forzada ocurre en…', options:['Líquidos y gases (agua/aire/aceite/vapor)','Sólidos cristalinos','Vacío sin fluido','Solo en hornos estáticos'], correct:0, explain:'Movimiento de masas de fluido; depende de propiedades térmicas y capa límite.'},
+  {tag:'TM&E', q:'Radiación no requiere contacto y en cocina destaca…', options:['Infrarroja; hornos/parrillas','Conducción a través de sartén','Convección de aceite','Inducción magnética'], correct:0, explain:'Transferencia por ondas; parrilla/sol/quemadores.'},
+  {tag:'TM&E', q:'Inducción calienta porque…', options:['Campo magnético induce corrientes y agitación magnética en material ferromagnético','El aire caliente rodea el recipiente','Los rayos UV ionizan el agua','La resistencia eléctrica del cobre irradia'], correct:0, explain:'Pérdidas magnéticas → calor en la olla adecuada.'},
+  {tag:'TM&E', q:'Secuencia de transferencia de energía en cocción:', options:['Medio→superficie→interior→tras retiro (enfriamiento)','Interior→superficie→medio','Superficie→medio→interior','No existe secuencia'], correct:0, explain:'Flujo desde el medio hasta el centro; luego evolución al retirarlo.'},
+  {tag:'TM&E', q:'Rol del agua en el alimento:', options:['Protege superficie y transmite calor internamente','Solo aporta sabor','Impide toda reacción química','Disminuye conductividad térmica'], correct:0},
+  {tag:'TM&E', q:'Vía seca se caracteriza por…', options:['Medio sin agua (horno, plancha, fritura, salteado, vacío, spiedo)','Uso de agua como medio','Solo microondas','No produce pardeamientos'], correct:0, explain:'Favorece pardeamientos no enzimáticos: caramelización/dextrinización.'},
+  {tag:'TM&E', q:'Vía húmeda incluye…', options:['Hervir, vapor, escaldado, presión','Parrilla y plancha','Fritura por aire','Sous‑vide siempre > 100°C'], correct:0},
+  {tag:'TM&E', q:'Microondas calienta principalmente por…', options:['Rotación de dipolos de agua por microondas de alta frecuencia','Conducción desde la base','Irradiación UV ionizante','Reacciones exotérmicas de Maillard'], correct:0},
+  {tag:'TM&E', q:'Traslado a método: parrilla, horno, plancha:', options:[
+    'Parrilla→radiación IR; Horno→convección; Plancha→conducción',
+    'Parrilla→conducción; Horno→radiación; Plancha→convección',
+    'Todos por convección',
+    'Parrilla→microondas; Horno→inducción; Plancha→radiación'], correct:0},
+
+  // LIP – Lípidos y fritura (12)
+  {tag:'LIP', q:'El calor específico del agua vs aceites (~20°C) es…', options:['Agua ≈ 1; aceites ≈ 0,47','Ambos ≈ 1','Agua ≈ 0,45; aceites ≈ 1','Aceites ≈ 0,1'], correct:0, explain:'El agua almacena más calor por unidad de masa.'},
+  {tag:'LIP', q:'Grasa sólida vs líquida: diferencia clave', options:['Presencia de cristales (≥10% en sólida)','Solo por color','pH','Contenido de agua libre'], correct:0},
+  {tag:'LIP', q:'Polimorfismo en grasas implica…', options:['Diferentes formas cristalinas (α, β’, β) con distinta estabilidad','Variación del pH','Cambios de aw exclusivamente','Oxidación controlada'], correct:0},
+  {tag:'LIP', q:'Templado de chocolate busca…', options:['Estabilizar forma β’/β para brillo y textura','Eliminar toda grasa','Evitar cualquier cristal','Aumentar humedad'], correct:0},
+  {tag:'LIP', q:'En fritura profunda, T recomendada general:', options:['170–190°C','120–140°C','>220°C siempre','90–100°C'], correct:0},
+  {tag:'LIP', q:'Relación alimento:aceite según temperatura inicial:', options:['Refrigerado 1:5 • Congelado 1:10','Ambiente 1:1','Congelado 1:2','Siempre 1:20'], correct:0},
+  {tag:'LIP', q:'Punto de humo disminuye cuando…', options:['Aumentan los AGL por hidrólisis','Disminuye la luz ambiental','Se usa acero inoxidable','Se filtra el aceite'], correct:0},
+  {tag:'LIP', q:'Orden de preferencia para fritar (punto de humo):', options:['Alto oleico > arroz > girasol > maíz > soja','Soja > maíz > girasol > arroz > alto oleico','Oliva extra virgen siempre primero','Todos iguales'], correct:0},
+  {tag:'LIP', q:'Absorción lipídica aumenta con…', options:['Mayor superficie/irregularidad y exceso de humedad','Piezas más grandes y compactas','Aceite muy caliente (en rango) y tiempo corto','Baja carga del equipo'], correct:0},
+  {tag:'LIP', q:'Acroleína en frituras proviene de…', options:['Deshidratación térmica del glicerol','Oxidación de hierro hemo','Fermentación láctica','Evaporación de agua'], correct:0},
+  {tag:'LIP', q:'Rango bibliográfico de absorción de grasa en fritura:', options:['≈ 4–45%','≈ 0–3%','≈ 60–90%','Siempre 25%'], correct:0},
+  {tag:'LIP', q:'Mejor practica de almacenamiento del aceite usado:', options:['Filtrar caliente (~66°C), envase de acero de cuello estrecho, tapado y frío','Plástico abierto a temperatura ambiente','Mezclar con agua','Dejar partículas para dar sabor'], correct:0},
+
+  // HUE – Huevo (9)
+  {tag:'HUE', q:'Seguridad microbiológica (huevo/preparaciones):', options:['≥72°C (y ≥80°C en picadas/hamburguesas)','60°C por segundos','Solo lavarlo','No requiere control térmico'], correct:0},
+  {tag:'HUE', q:'Complejo avidina‑biotina:', options:['Avidina se une a biotina; calor libera biotina','Biotina destruye la avidina','No afecta biodisponibilidad','Solo ocurre en yema'], correct:0},
+  {tag:'HUE', q:'Orden general en coagulación de proteínas del huevo:', options:['Desnaturalización → agregación → coágulo','Gelificación → desnaturalización','Caramelización → coagulación','Emulsión → coágulo'], correct:0},
+  {tag:'HUE', q:'Huevo “poached/pochet” y seguridad:', options:['Yema puede no alcanzar 72°C → no seguro','Siempre seguro por estar en agua','Depende solo del pH','El vinagre esteriliza'], correct:0},
+  {tag:'HUE', q:'Clara vs yema: temperaturas de coagulación:', options:['Clara antes; yema ~+5°C más','Ambas iguales','Yema antes que clara','No coagulan'], correct:0},
+  {tag:'HUE', q:'Factores que estabilizan espuma de clara:', options:['Ácido (más estable), azúcar tardío, cocción','Aceite en bol','Clara muy fría','Exceso de agua'], correct:0},
+  {tag:'HUE', q:'Azúcar en batido de claras…', options:['Retarda formación pero aumenta estabilidad','Acelera formación y baja estabilidad','No tiene efecto','Desnaturaliza caseínas'], correct:0},
+  {tag:'HUE', q:'En omelette/budines el huevo actúa como…', options:['Unión (y gel en flanes)','Colorante exclusivo','Fermento','Antioxidante únicamente'], correct:0},
+  {tag:'HUE', q:'Mayonesa casera:', options:['Emulsión inestable sanitariamente por huevo crudo','Sistema esterilizado','Gel proteico','Espuma seca'], correct:0},
+
+  // CAR – Carnes (10)
+  {tag:'CAR', q:'CRA (capacidad de retención de agua) depende de…', options:['pH y estructura proteica; mínima cerca de pH ~5','Solo del contenido graso','Color inicial','Tipo de corte exclusivamente'], correct:0},
+  {tag:'CAR', q:'Temperaturas guía para inocuidad (carne aviar):', options:['Pechuga > 90°C, muslo > 95°C','Siempre 60°C','70°C en todo caso','95°C solo en pescado'], correct:0},
+  {tag:'CAR', q:'Secuencia de cambios térmicos en carne:', options:[
+    '40–50°C↑ dureza (miofibrilares); 60–65°C colágeno se contrae; 70–90°C solubiliza→terneza',
+    '20–30°C gelatina; 35°C Maillard; 40°C carameliza',
+    '60°C todo se ablanda y no cambia luego',
+    'No hay cambios definidos'], correct:0},
+  {tag:'CAR', q:'Mioglobina y color tras cocción:', options:['Desnaturalización globina >80°C + estado Fe2+/Fe3+ define pardeado','Sólo depende de grasa','Depende de lactosa','Invariable con temperatura'], correct:0},
+  {tag:'CAR', q:'Jugosidad depende sobre todo de…', options:['CRA + grasa intramuscular (marmoleo) + contenido acuoso','Sólo del colágeno','Solo del peso','pH del agua'], correct:0},
+  {tag:'CAR', q:'Sous‑vide en carnes:', options:['50–85°C durante horas; mejora terneza y rendimiento sin Maillard','>120°C al vacío','No requiere cadena de frío','Siempre desarrolla corteza'], correct:0},
+  {tag:'CAR', q:'Parrilla vs plancha vs hervido:', options:['Parrilla IR; plancha conducción; vía húmeda sin Maillard','Todos producen Maillard igual','Hervido produce corteza parda intensa','Plancha no usa conducción'], correct:0},
+  {tag:'CAR', q:'Zona de peligro microbiológica común:', options:['~5–60°C','−18–0°C','>100°C','<0°C'], correct:0},
+  {tag:'CAR', q:'Recalentamiento seguro sugerido:', options:['≥70°C en el centro','60°C','50°C','No es necesario'], correct:0},
+  {tag:'CAR', q:'Congelación puede causar…', options:['Daño celular, pérdida de fluidos y oxidación de grasas','Aumento de vitaminas siempre','Polimerización de azúcares','Eliminación total de MO'], correct:0},
+
+  // HC‑BPM – HC simples (BPM) (7)
+  {tag:'HC‑BPM', q:'Mayor poder edulcorante (a igual T):', options:['Fructosa > sacarosa > glucosa > lactosa','Sacarosa > fructosa > glucosa > lactosa','Glucosa > fructosa > sacarosa > lactosa','Lactosa > sacarosa > fructosa'], correct:0},
+  {tag:'HC‑BPM', q:'El dulzor aumenta con…', options:['Temperaturas más bajas (frío)','Temperaturas más altas','Más viscosidad siempre','pH neutro'], correct:0},
+  {tag:'HC‑BPM', q:'Soluciones sobresaturadas pueden…', options:['Cristalizar al enfriar (nucleación→crecimiento)','No cristalizar jamás','Ser menos concentradas que saturadas','No dependen de agitación'], correct:0},
+  {tag:'HC‑BPM', q:'Higroscopicidad (mayor→menor):', options:['Fructosa > azúcar invertido > sacarosa > glucosa > lactosa','Lactosa > fructosa > sacarosa > glucosa','Todas iguales','Depende solo del pH'], correct:0},
+  {tag:'HC‑BPM', q:'Caramelización vs Maillard:', options:['Caramelización: azúcar solo; Maillard: azúcar reductor + AA/proteínas','Ambas necesitan proteínas','Ambas son enzimáticas','Ninguna genera color pardo'], correct:0},
+  {tag:'HC‑BPM', q:'Maillard favorece con…', options:['Alta T, aw baja/moderada, pH neutro‑alcalino, tiempo','pH ácido fuerte y aw alta','Ausencia total de calor','Luz UV únicamente'], correct:0},
+  {tag:'HC‑BPM', q:'Pérdida de lisina ocurre por…', options:['Reacción de Maillard','Caramelización','Convección','Fermentación alcohólica'], correct:0},
+
+  // CEL‑LEG – Cereales/leguminosas/pseudo (6)
+  {tag:'CEL‑LEG', q:'En granulación fina (salsa blanca/postres):', options:['Hidratar 1/3 del líquido en frío; 2/3 luego; revolver para gelificar parejo','Hidratar con agua hirviendo','No hidratar','Agregar todo el azúcar al inicio para evitar grumos'], correct:0},
+  {tag:'CEL‑LEG', q:'Arroz de grano corto vs largo:', options:['Corto: + amilopectina (más pegajoso); largo: + amilosa','Largo: + amilopectina','Iguales tecnológicamente','Depende solo del lavado'], correct:0},
+  {tag:'CEL‑LEG', q:'Arroz parboil se caracteriza por…', options:['Almidón pregelatinizado con vapor; no se pasa fácil','Más fibra soluble','Menos tiempo de cocción que todos','Ser integral siempre'], correct:0},
+  {tag:'CEL‑LEG', q:'Leguminosas secas requieren…', options:['Remojo para reducir antinutrientes antes del calor','No remojo','Solo sal al inicio','Fermentación alcohólica'], correct:0},
+  {tag:'CEL‑LEG', q:'Pseudocereales (quinoa, amaranto, sarraceno):', options:['No son gramíneas; ricos en almidón; sin gluten','Son gramíneas; con gluten','Solo lípidos','No requieren lavado'], correct:0},
+  {tag:'CEL‑LEG', q:'Quinoa: buena práctica previa a cocción:', options:['Lavar para quitar saponinas (amargor)','Remojar en aceite','No lavar jamás','Añadir bicarbonato'], correct:0},
+
+  // LEC – Leche (7)
+  {tag:'LEC', q:'Micelas de caseína se desestabilizan por…', options:['pH 4,6 (PI) o cuajo (quimosina)','Más luz','CO2','UHT'], correct:0},
+  {tag:'LEC', q:'Proteínas séricas (β‑LG, α‑LA) son…', options:['Termolábiles; desnaturalizan con calor y sales deshidratantes','Termoestables como caseínas','Insolubles en todo pH','No afectan textura'], correct:0},
+  {tag:'LEC', q:'Homogeneización de leche genera…', options:['Glóbulos de grasa más pequeños → emulsión más estable y color más blanco','Coagulación proteica inmediata','Reducción de lactosa','Eliminación de vitaminas'], correct:0},
+  {tag:'LEC', q:'UHT típico y efecto:', options:['135–150°C segundos + envase aséptico → vida útil ambiente','63°C 30 min → cadena de frío','Hervor 100°C 10 min → esterilidad comercial','No cambia vitaminas hidrosolubles'], correct:0},
+  {tag:'LEC', q:'Lactosa es…', options:['Disacárido reductor (Glc+Gal), dulzor bajo','Monosacárido no reductor','Ácido orgánico','Alcohol de azúcar (poliol)'], correct:0},
+  {tag:'LEC', q:'Leche descremada pierde sobre todo…', options:['Vitaminas liposolubles (A/D/E/K) con la grasa','Calcio por completo','Lactosa','Proteínas séricas'], correct:0},
+  {tag:'LEC', q:'Sinéresis en yogur aumenta con…', options:['Gel débil/daño por agitación','Más sólidos lácteos totales','Gel bien formado','pH y T controlados'], correct:0},
+
+  // GLU – Gluten (7)
+  {tag:'GLU', q:'Gluten se forma por…', options:['Harina de trigo + agua + amasado (gliadina+glutenina)','Solo por agregar sal','Cualquier harina sin proteínas','Frío intenso'], correct:0},
+  {tag:'GLU', q:'Gliadina vs glutenina:', options:['Gliadina: viscosidad/extensibilidad; Glutenina: elasticidad (puentes S‑S)','Ambas idénticas','Gliadina da color rojo','Glutenina es soluble en agua'], correct:0},
+  {tag:'GLU', q:'pH y solubilidad de proteínas del trigo:', options:['Mínima cerca de pH ~5 (PI) → menos interacción con agua','Máxima en pH 5','Independiente del pH','Solo depende de sodio'], correct:0},
+  {tag:'GLU', q:'Sal en panificación…', options:['Aporta firmeza al gluten; suele ≤2%','Inhibe toda fermentación','Se evita siempre','Reduce volumen siempre'], correct:0},
+  {tag:'GLU', q:'Azúcar en masas dulces…', options:['Sustrato de levadura pero en exceso limita red de gluten','No afecta al gluten','Elimina agua ligada','Aumenta salinidad'], correct:0},
+  {tag:'GLU', q:'Lípidos en masas…', options:['Pequeñas dosis mejoran volumen; exceso limita gluten','Siempre limitan gluten','No influyen','Endurecen el almidón'], correct:0},
+  {tag:'GLU', q:'Cocción del pan (orden):', options:['50–60°C coagula gluten / inicia gelatinización; ~90°C almidón gelatinizado; >100°C corteza (dextrinas+Maillard)','>100°C primero; luego 50°C','Carameliza antes de gelificar','No hay gelatinización'], correct:0},
+
+  // F&H – Frutas y hortalizas (9)
+  {tag:'F&H', q:'Productos climatéricos vs no climatéricos:', options:['Climatéricos maduran post‑cosecha (pico respiratorio)','Ninguno madura post‑cosecha','Solo tropicales son climatéricos','Todos son no climatéricos'], correct:0},
+  {tag:'F&H', q:'Daño por frío en tropicales/subtropicales evita con…', options:['Almacenamiento > ~10°C','< 0°C siempre','Cocción','Exceso de etileno'], correct:0},
+  {tag:'F&H', q:'Pardeamiento enzimático involucra…', options:['Polifenol oxidasa + O2 → quinonas → melaninas (pH 5–7; 30–35°C óptimos)','Solo calor seco','Azúcar invertido','Caseínas'], correct:0},
+  {tag:'F&H', q:'Clorofila en cocción puede pasar a…', options:['Feofitina (verde oliva/grisáceo) si no se aplica buena práctica','Antocianinas','Betalaínas','Carotenoides azules'], correct:0},
+  {tag:'F&H', q:'Efecto del bicarbonato en clorofila:', options:['Forma clorofilina (verde intenso) pero afecta textura/sabor','No cambia el color','Siempre recomendado','Vuelve insoluble la clorofila'], correct:0},
+  {tag:'F&H', q:'Flavonoides (antocianinas) cambian color con pH:', options:['Ácido: rojo; neutro: púrpura; alcalino: azul/verde','Independiente del pH','Ácido: verde','Alcalino: rojo'], correct:0},
+  {tag:'F&H', q:'Buena práctica: hoja verde en hervor:', options:['Mínima agua en ebullición; tapado; destapar 3′; volver a tapar; escurrir','Mucha agua fría y tapado todo el tiempo','Agua con bicarbonato siempre','Cocer sin hervir'], correct:0},
+  {tag:'F&H', q:'Textura al cocinar vegetales:', options:['Pectinas insolubles → solubles; hemicelulosas se ablandan; lignina no cambia','Lignina se disuelve','Solo por pérdida de agua','Celulosa se carameliza'], correct:0},
+  {tag:'F&H', q:'Azúcar en almíbar (zapallo):', options:['Con Ca2+ endurece superficie; alta [azúcar] dificulta solubilizar pectinas','Ablanda por completo','No afecta textura','Baja color'], correct:0},
+
+  // ALM – Almidón APM (7)
+  {tag:'ALM', q:'Gelatinización del almidón comienza…', options:['>~60–70°C según variedad; hinchamiento y pérdida de orden','<10°C','Sin calor','A 40°C exactos'], correct:0},
+  {tag:'ALM', q:'Orden de fenómenos (almidón):', options:['Gelatinización → gelificación (al enfriar) → retrogradación','Retrogradación → gelatinización → gelificación','Gelificación → caramelización','Maillard → gelificación'], correct:0},
+  {tag:'ALM', q:'Amilosa vs amilopectina:', options:['Amilosa lineal ~15–30%; primero en salir; gel firme; amilopectina 70–85% ramificada','Ambas lineales idénticas','Amilopectina lineal','Amilosa siempre 70–85%'], correct:0},
+  {tag:'ALM', q:'Retrogradación produce…', options:['Recristalización (geles más firmes) y sinéresis; mayor resistencia enzimática','Gel más blando siempre','Más dulzor','Disolución total'], correct:0},
+  {tag:'ALM', q:'Azúcar y lípidos sobre gelatinización:', options:['Azúcar compite por agua (↑T/↓hidratación); lípidos ↑rango de gelatinización','Azúcar no influye','Lípidos la eliminan','Ambos la aceleran sin cambios'], correct:0},
+  {tag:'ALM', q:'Pan envejece por…', options:['Retrogradación de amilosa/almidón (miga rígida, corteza dura)','Oxidación de clorofila','Pérdida de lactosa','Desnaturalización de mioglobina'], correct:0},
+  {tag:'ALM', q:'Almidón resistente es…', options:['Fracción no digerida en ID; efecto prebiótico','100% digerible','Solo dextrinas','Azúcar reductor'], correct:0},
+
+  // BPM – Buenas Prácticas (4)
+  {tag:'BPM', q:'BPM buscan…', options:['Ambiente higiénico en toda la cadena → inocuidad y calidad','Solo mejorar sabor','Eliminar etiquetado','Aumentar sodio'], correct:0},
+  {tag:'BPM', q:'Riesgo se define como…', options:['Probabilidad de que ocurra un peligro (físico, químico, biológico)','Daño siempre inevitable','Etiqueta frontal','Solo presencia de MO'], correct:0},
+  {tag:'BPM', q:'Manipulador/utensilios/proceso implican…', options:['Tres frentes de control en BPM','Solo control del proceso','Solo del envase','No aplican en cocina'], correct:0},
+  {tag:'BPM', q:'Guantes de nitrilo negros…', options:['Dificultan ver suciedad → no recomendados','Son obligatorios','Esterilizan las manos','Reemplazan el lavado'], correct:0},
+
+  // NORM – Receta y Ficha técnica (4)
+  {tag:'NORM', q:'Receta estandarizada incluye…', options:['Encabezado, ingredientes (orden lógico/porcentajes), procedimiento','Solo lista de compras','Diagrama de flujo y costos','HACCP completo'], correct:0},
+  {tag:'NORM', q:'Cálculo por % verdadero en receta:', options:['Base 100% = suma total de ingredientes','Base 100% = ingrediente mayor','Nunca se usa','Se basa en volumen únicamente'], correct:0},
+  {tag:'NORM', q:'Diagrama de flujo – errores comunes:', options:['Omitir etapas, cruzar líneas, poner cantidades/equipos','Mostrar solo fotos','No validar en terreno','Usar símbolos estándar'], correct:0},
+  {tag:'NORM', q:'Ficha técnica agrega respecto a receta…', options:['Rol funcional de ingredientes y datos técnicos','Solo formato bonito','Elimina procedimientos','Sustituye HACCP'], correct:0},
+];
+
+// ===== Utilidades =====
+const $ = s => document.querySelector(s);
+const grid = $('#grid');
+const count = $('#count');
+const answered = $('#answered');
+const right = $('#right');
+const progress = $('#progress');
+const search = $('#search');
+let STATE = {answers: {}, filter:'ALL', query:'', seed: Date.now()};
+
+function shuffle(arr, rng=Math.random){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(rng()* (i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]}
+  return arr;
+}
+
+function seededRandom(seed){
+  let x = Math.sin(seed++)*10000; return ()=>{x=Math.sin(x)*10000; return x-Math.floor(x)};
+}
+
+function render(){
+  const rng = seededRandom(STATE.seed);
+  grid.innerHTML='';
+  const filtered = BANK.filter(b=> STATE.filter==='ALL' ? true : b.tag===STATE.filter)
+                      .filter(b=> !STATE.query || (b.q+ '\n' + b.options.join(' ')+ (b.explain||'')).toLowerCase().includes(STATE.query));
+  count.textContent = filtered.length;
+  let idx=0;
+  filtered.forEach((item)=>{
+    // Barajar opciones por tarjeta de forma determinista respecto a seed + enunciado
+    const options = item.options.map((t,i)=>({t, i}));
+    const localRng = seededRandom(STATE.seed + item.q.length + item.options.join('').length);
+    shuffle(options, localRng);
+    const correctIdx = options.findIndex(o=>o.i===item.correct);
+
+    const card = document.createElement('div');
+    card.className='card';
+    const head = document.createElement('div'); head.className='qhead';
+    head.innerHTML = `<span class="qno">${++idx}</span><div style="flex:1">${item.q}</div><span class="tag">${item.tag}</span>`;
+    const opts = document.createElement('div'); opts.className='options';
+    options.forEach((o,k)=>{
+      const opt = document.createElement('div'); opt.className='opt';
+      opt.innerHTML = `<div class="letter">${String.fromCharCode(65+k)}</div><div style="flex:1">${o.t}</div>`;
+      opt.onclick = ()=>{
+        if(opt.classList.contains('right') || opt.classList.contains('wrong')) return; // no multiple taps
+        const wasRight = (k===correctIdx);
+        opt.classList.add(wasRight? 'right':'wrong');
+        // marcar el resto
+        [...opts.children].forEach((el,m)=>{ if(m!==k){ el.style.opacity=0.8; }});
+        STATE.answers[item.q] = wasRight;
+        updateMeters();
+        // explicación
+        if(item.explain){ const ex = document.createElement('div'); ex.className='explain'; ex.textContent = '💡 ' + item.explain; opt.after(ex); }
+      };
+      opts.appendChild(opt);
+    });
+    card.appendChild(head); card.appendChild(opts);
+    grid.appendChild(card);
+  });
+  updateMeters();
+}
+
+function updateMeters(){
+  const keys = Object.keys(STATE.answers);
+  const totalAnswered = keys.length;
+  const totalRight = keys.filter(k=>STATE.answers[k]).length;
+  answered.textContent = totalAnswered;
+  right.textContent = totalRight;
+  const totalShown = parseInt(count.textContent)||1;
+  progress.textContent = Math.round((totalAnswered/totalShown)*100);
+}
+
+// Eventos UI
+$('#shuffle').onclick = ()=>{ STATE.seed = Date.now(); STATE.answers={}; render(); };
+$('#reset').onclick = ()=>{ STATE.answers={}; render(); };
+$('#toTop').onclick = ()=> window.scrollTo({top:0,behavior:'smooth'});
+$('#toBot').onclick = ()=> window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+search.oninput = (e)=>{ STATE.query = e.target.value.trim().toLowerCase(); render(); };
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    STATE.filter = btn.dataset.tab; STATE.answers={}; render();
+  };
+});
+
+// Inicial
+render();
+</script>
+</body>
+</html>
